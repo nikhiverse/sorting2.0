@@ -1,154 +1,217 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A sorting algorithm visualizer with C++ algorithms compiled to WebAssembly. Visualize Bubble, Quick, Heap, Merge, Insertion, Selection, Shell, Tim, and Tree Sort in real-time."
+    />
+    <title>Sorting Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/png" href="img/sorting.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description"
-    content="A sorting algorithm visualizer with C++ algorithms compiled to WebAssembly. Visualize Bubble, Quick, Heap, Merge, Insertion, Selection, Shell, Tim, and Tree Sort in real-time.">
-  <title>Sorting Visualizer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-</head>
+  <body>
+    <div id="app">
+      <!-- Header -->
+      <header id="header">
+        <div id="logo">
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="url(#grad)"
+            stroke-width="2"
+          >
+            <defs>
+              <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color: #06d6a0" />
+                <stop offset="100%" style="stop-color: #a855f7" />
+              </linearGradient>
+            </defs>
+            <rect x="3" y="14" width="3" height="7" rx="1" />
+            <rect x="8" y="8" width="3" height="13" rx="1" />
+            <rect x="13" y="3" width="3" height="18" rx="1" />
+            <rect x="18" y="10" width="3" height="11" rx="1" />
+          </svg>
+          <h1>Sorting Visualizer</h1>
+        </div>
+        <div id="badge">C++ / WASM</div>
+      </header>
 
-<body>
-  <div id="app">
+      <!-- Visualization Area -->
+      <main id="visualizer">
+        <div id="bars-container"></div>
+        <div id="loading-overlay">
+          <div class="spinner"></div>
+          <p>Loading WASM Module...</p>
+        </div>
+      </main>
 
-    <!-- Header -->
-    <header id="header">
-      <div id="logo">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#grad)" stroke-width="2">
-          <defs>
-            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#06d6a0" />
-              <stop offset="100%" style="stop-color:#a855f7" />
-            </linearGradient>
-          </defs>
-          <rect x="3" y="14" width="3" height="7" rx="1" />
-          <rect x="8" y="8" width="3" height="13" rx="1" />
-          <rect x="13" y="3" width="3" height="18" rx="1" />
-          <rect x="18" y="10" width="3" height="11" rx="1" />
-        </svg>
-        <h1>Sorting Visualizer</h1>
+      <!-- Stats Panel -->
+      <div id="stats-panel" class="hidden">
+        <div class="stat-item">
+          <span class="stat-label">Swaps</span>
+          <span class="stat-value" id="stat-swaps">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Comparisons</span>
+          <span class="stat-value" id="stat-comparisons">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Time</span>
+          <span class="stat-value" id="stat-time">—</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Space</span>
+          <span class="stat-value" id="stat-space">—</span>
+        </div>
       </div>
-      <div id="badge">C++ / WASM</div>
-    </header>
 
-    <!-- Visualization Area -->
-    <main id="visualizer">
-      <div id="bars-container"></div>
-      <div id="loading-overlay">
-        <div class="spinner"></div>
-        <p>Loading WASM Module...</p>
-      </div>
-    </main>
+      <!-- Control Panel -->
+      <section id="controls">
+        <div id="controls-inner">
+          <!-- Algorithm Selection -->
+          <div class="control-group">
+            <label class="control-label">Algorithm</label>
+            <div id="algo-buttons">
+              <button class="algo-btn" data-algo="bubbleSort">Bubble</button>
+              <button class="algo-btn" data-algo="insertionSort">
+                Insertion
+              </button>
+              <button class="algo-btn" data-algo="selectionSort">
+                Selection
+              </button>
+              <button class="algo-btn" data-algo="quickSort">Quick</button>
+              <button class="algo-btn" data-algo="heapSort">Heap</button>
+              <button class="algo-btn" data-algo="mergeSort">Merge</button>
+              <button class="algo-btn" data-algo="shellSort">Shell</button>
+              <button class="algo-btn" data-algo="timSort">Tim</button>
+              <button class="algo-btn" data-algo="treeSort">Tree</button>
+            </div>
+          </div>
 
-    <!-- Stats Panel -->
-    <div id="stats-panel" class="hidden">
-      <div class="stat-item">
-        <span class="stat-label">Swaps</span>
-        <span class="stat-value" id="stat-swaps">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Comparisons</span>
-        <span class="stat-value" id="stat-comparisons">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Time</span>
-        <span class="stat-value" id="stat-time">—</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Space</span>
-        <span class="stat-value" id="stat-space">—</span>
-      </div>
-    </div>
+          <!-- Array Size -->
+          <div class="control-group">
+            <label class="control-label"
+              >Bars: <span id="size-value">32</span></label
+            >
+            <input
+              type="range"
+              id="size-slider"
+              min="16"
+              max="48"
+              value="32"
+              step="1"
+            />
+          </div>
 
-    <!-- Control Panel -->
-    <section id="controls">
-      <div id="controls-inner">
+          <!-- Speed Control -->
+          <div class="control-group">
+            <label class="control-label">Speed</label>
+            <div id="speed-buttons">
+              <button class="speed-btn" data-speed="slow">0.5x</button>
+              <button class="speed-btn active" data-speed="normal">1x</button>
+              <button class="speed-btn" data-speed="fast">2x</button>
+              <button class="speed-btn" data-speed="ultra">4x</button>
+            </div>
+          </div>
 
-        <!-- Algorithm Selection -->
-        <div class="control-group">
-          <label class="control-label">Algorithm</label>
-          <div id="algo-buttons">
-            <button class="algo-btn" data-algo="bubbleSort">Bubble</button>
-            <button class="algo-btn" data-algo="insertionSort">Insertion</button>
-            <button class="algo-btn" data-algo="selectionSort">Selection</button>
-            <button class="algo-btn" data-algo="quickSort">Quick</button>
-            <button class="algo-btn" data-algo="heapSort">Heap</button>
-            <button class="algo-btn" data-algo="mergeSort">Merge</button>
-            <button class="algo-btn" data-algo="shellSort">Shell</button>
-            <button class="algo-btn" data-algo="timSort">Tim</button>
-            <button class="algo-btn" data-algo="treeSort">Tree</button>
+          <!-- Action Buttons -->
+          <div class="control-group actions">
+            <button id="btn-generate" class="action-btn generate-btn">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M1 4v6h6" />
+                <path d="M23 20v-6h-6" />
+                <path
+                  d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"
+                />
+              </svg>
+              Generate
+            </button>
+            <button id="btn-sort" class="action-btn sort-btn" disabled>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              Sort!
+            </button>
+            <button
+              id="btn-reverse"
+              class="action-btn reverse-btn hidden"
+              disabled
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="1 4 1 10 7 10" />
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+              </svg>
+              Reverse
+            </button>
           </div>
         </div>
+      </section>
 
-        <!-- Array Size -->
-        <div class="control-group">
-          <label class="control-label">Bars: <span id="size-value">32</span></label>
-          <input type="range" id="size-slider" min="16" max="48" value="32" step="1">
+      <!-- Legend -->
+      <div id="legend">
+        <div class="legend-item">
+          <span class="legend-dot default"></span>Unsorted
         </div>
-
-        <!-- Speed Control -->
-        <div class="control-group">
-          <label class="control-label">Speed</label>
-          <div id="speed-buttons">
-            <button class="speed-btn" data-speed="slow">0.5x</button>
-            <button class="speed-btn active" data-speed="normal">1x</button>
-            <button class="speed-btn" data-speed="fast">2x</button>
-            <button class="speed-btn" data-speed="ultra">4x</button>
-          </div>
+        <div class="legend-item">
+          <span class="legend-dot comparing"></span>Comparing
         </div>
-
-        <!-- Action Buttons -->
-        <div class="control-group actions">
-          <button id="btn-generate" class="action-btn generate-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 4v6h6" />
-              <path d="M23 20v-6h-6" />
-              <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
-            </svg>
-            Generate
-          </button>
-          <button id="btn-sort" class="action-btn sort-btn" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
-            Sort!
-          </button>
-          <button id="btn-reverse" class="action-btn reverse-btn hidden" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="1 4 1 10 7 10" />
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-            </svg>
-            Reverse
-          </button>
+        <div class="legend-item">
+          <span class="legend-dot swapping"></span>Swapping
         </div>
-
+        <div class="legend-item">
+          <span class="legend-dot pivot"></span>Pivot
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot sorted"></span>Sorted
+        </div>
       </div>
-    </section>
 
-    <!-- Legend -->
-    <div id="legend">
-      <div class="legend-item"><span class="legend-dot default"></span>Unsorted</div>
-      <div class="legend-item"><span class="legend-dot comparing"></span>Comparing</div>
-      <div class="legend-item"><span class="legend-dot swapping"></span>Swapping</div>
-      <div class="legend-item"><span class="legend-dot pivot"></span>Pivot</div>
-      <div class="legend-item"><span class="legend-dot sorted"></span>Sorted</div>
+      <!-- Footer -->
+      <footer id="footer">
+        created by
+        <a href="https://www.linkedin.com/in/rathodnk/" target="_blank"
+          >rathodnk</a
+        >
+        | contact:
+        <a href="mailto:nikhil.webdna@gmail.com" target="_blank"
+          >nikhil.webdna@gmail.com</a
+        >
+      </footer>
     </div>
 
-    <!-- Footer -->
-    <footer id="footer">
-      created by <a href="https://www.linkedin.com/in/rathodnk/" target="_blank">rathodnk</a> | contact: <a
-        href="mailto:nikhil.webdna@gmail.com">nikhil.webdna@gmail.com</a>
-    </footer>
-
-  </div>
-
-  <script src="sorting.js"></script>
-  <script src="app.js"></script>
-</body>
-
+    <script src="sorting.js"></script>
+    <script src="app.js"></script>
+  </body>
 </html>
