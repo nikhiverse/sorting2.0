@@ -9,7 +9,7 @@
   let selectedAlgorithm = null;
   let isRunning = false;
   let animationTimer = null;
-  let barCount = 32;
+  let barCount = 24;
   let isSorted = false;
 
   // Speed map (ms per step)
