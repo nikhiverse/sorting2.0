@@ -11,12 +11,12 @@
 // Uses Fisher-Yates shuffle on the full range, then picks the first 'length' values
 
 static void generateRandomArray(int length) {
-    // Pool of all possible values: 8 to 96 (89 values)
-    const int MIN_VAL = 8;
+    // Pool of all possible values: 2 to 96 (95 values)
+    const int MIN_VAL = 2;
     const int MAX_VAL = 96;
-    const int POOL_SIZE = MAX_VAL - MIN_VAL + 1; // 89
+    const int POOL_SIZE = MAX_VAL - MIN_VAL + 1; // 95
 
-    int pool[89]; // POOL_SIZE = 89
+    int pool[95]; // POOL_SIZE = 95
     for (int i = 0; i < POOL_SIZE; i++) {
         pool[i] = MIN_VAL + i;
     }

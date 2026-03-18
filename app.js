@@ -9,7 +9,7 @@
   let selectedAlgorithm = null;
   let isRunning = false;
   let animationTimer = null;
-  let barCount = 24;
+  let barCount = 12;
   let isSorted = false;
 
   // Speed map (ms per step)
@@ -21,11 +21,11 @@
   };
   let currentSpeed = "normal";
 
-  // Step types (mirror C++ defines)
   const STEP_COMPARE = 0;
   const STEP_SWAP = 1;
   const STEP_SORTED = 2;
   const STEP_PIVOT = 3;
+  const STEP_SET = 4;
 
   const algoStats = {
     bubbleSort: { time: "O(n²)", space: "O(1)" },
@@ -36,7 +36,10 @@
     mergeSort: { time: "O(n log n)", space: "O(n)" },
     shellSort: { time: "O(n log n)", space: "O(1)" },
     timSort: { time: "O(n log n)", space: "O(n)" },
-    treeSort: { time: "O(n log n)", space: "O(n)" }
+    treeSort: { time: "O(n log n)", space: "O(n)" },
+    countingSort: { time: "O(n + k)", space: "O(n + k)" },
+    bucketSort: { time: "O(n + k)", space: "O(n)" },
+    radixSort: { time: "O(d(n + k))", space: "O(n + k)" }
   };
 
   // ===== DOM REFERENCES =====
@@ -73,6 +76,9 @@
       shellSort: Module.cwrap("shellSort", null, ["number"]),
       timSort: Module.cwrap("timSort", null, ["number"]),
       treeSort: Module.cwrap("treeSort", null, ["number"]),
+      countingSort: Module.cwrap("countingSort", null, ["number"]),
+      bucketSort: Module.cwrap("bucketSort", null, ["number"]),
+      radixSort: Module.cwrap("radixSort", null, ["number"]),
       setSortOrder: Module.cwrap("setSortOrder", null, ["number"]),
       getValue: Module.getValue,
       _module: Module,
@@ -92,7 +98,6 @@
 
     wasmModule.generateArray(barCount);
     readArrayFromWasm();
-    clearAllBarStates();
     renderBars();
     isSorted = false;
     btnReverse.classList.add("hidden");
@@ -110,37 +115,64 @@
   }
 
   // ===== RENDERING =====
+  function createRow(array, highlights = {}) {
+    const row = document.createElement("div");
+    row.className = "array-row";
+    for (let i = 0; i < array.length; i++) {
+      const bar = document.createElement("div");
+      let baseClass = "bar";
+      if (highlights[i]) {
+        baseClass += " " + highlights[i];
+      }
+      bar.className = baseClass;
+      bar.dataset.baseClass = baseClass;
+      bar.textContent = array[i];
+      row.appendChild(bar);
+    }
+    return row;
+  }
+
   function renderBars() {
     barsContainer.innerHTML = "";
-    const maxVal = 96;
-    for (let i = 0; i < currentArray.length; i++) {
-      const bar = document.createElement("div");
-      bar.className = "bar";
-      bar.style.height = ((currentArray[i] / maxVal) * 100) + "%";
-      bar.dataset.index = i;
-      barsContainer.appendChild(bar);
+    barsContainer.appendChild(createRow(currentArray));
+  }
+
+  function updateLastRowBarState(index, state) {
+    const rows = barsContainer.children;
+    if (rows.length > 0) {
+      const lastRow = rows[rows.length - 1];
+      const bars = lastRow.children;
+      if (bars[index]) {
+        if (state) {
+          bars[index].className = "bar " + state;
+        } else {
+          bars[index].className = bars[index].dataset.baseClass || "bar";
+        }
+      }
     }
   }
 
-  function updateBar(index, value) {
-    const bars = barsContainer.children;
-    if (bars[index]) {
-      const maxVal = 96;
-      bars[index].style.height = ((value / maxVal) * 100) + "%";
+  function setLastRowBaseState(index, state) {
+    const rows = barsContainer.children;
+    if (rows.length > 0) {
+      const lastRow = rows[rows.length - 1];
+      const bars = lastRow.children;
+      if (bars[index]) {
+        const newClass = "bar" + (state ? " " + state : "");
+        bars[index].dataset.baseClass = newClass;
+        bars[index].className = newClass;
+      }
     }
   }
 
-  function setBarState(index, state) {
-    const bars = barsContainer.children;
-    if (bars[index]) {
-      bars[index].className = "bar" + (state ? " " + state : "");
-    }
-  }
-
-  function clearAllBarStates() {
-    const bars = barsContainer.children;
-    for (let i = 0; i < bars.length; i++) {
-      bars[i].className = "bar";
+  function clearLastRowStates() {
+    const rows = barsContainer.children;
+    if (rows.length > 0) {
+      const lastRow = rows[rows.length - 1];
+      const bars = lastRow.children;
+      for (let i = 0; i < bars.length; i++) {
+        bars[i].className = "bar";
+      }
     }
   }
 
@@ -154,7 +186,7 @@
     btnReverse.disabled = true;
     statsPanel.classList.add("hidden");
     setControlsDisabled(true);
-    clearAllBarStates();
+    clearLastRowStates();
 
     // Save pre-sort array
     const preSortArray = currentArray.slice();
@@ -204,7 +236,7 @@
     setControlsDisabled(true);
     btnReverse.disabled = true;
     statsPanel.classList.add("hidden");
-    clearAllBarStates();
+    clearLastRowStates();
 
     // Save pre-reverse array
     const preReverseArray = currentArray.slice();
@@ -269,67 +301,87 @@
         return;
       }
 
-      // Clear previous compare highlights (but keep sorted and pivot)
-      if (prevCompareI >= 0 && !sortedSet.has(prevCompareI)) {
-        setBarState(prevCompareI, pivotIndex === prevCompareI ? "pivot" : "");
+      // Clear previous compare highlights by restoring base class
+      if (prevCompareI >= 0) {
+        updateLastRowBarState(prevCompareI, "");
       }
-      if (prevCompareJ >= 0 && !sortedSet.has(prevCompareJ)) {
-        setBarState(prevCompareJ, pivotIndex === prevCompareJ ? "pivot" : "");
+      if (prevCompareJ >= 0) {
+        updateLastRowBarState(prevCompareJ, "");
       }
       prevCompareI = -1;
       prevCompareJ = -1;
 
       const step = steps[stepIndex];
       stepIndex++;
+      
+      let nextDelay = SPEEDS[currentSpeed];
 
       switch (step.type) {
         case STEP_COMPARE:
-          setBarState(step.i, "comparing");
-          setBarState(step.j, "comparing");
+          updateLastRowBarState(step.i, "comparing");
+          updateLastRowBarState(step.j, "comparing");
           prevCompareI = step.i;
           prevCompareJ = step.j;
           comparisonCount++;
+          nextDelay = Math.max(1, nextDelay / 4);
           break;
 
         case STEP_SWAP:
-          setBarState(step.i, "swapping");
-          setBarState(step.j, "swapping");
-          prevCompareI = step.i;
-          prevCompareJ = step.j;
-          swapCount++;
+        case STEP_SET:
+          if (step.type === STEP_SWAP) {
+            const temp = localArray[step.i];
+            localArray[step.i] = localArray[step.j];
+            localArray[step.j] = temp;
+            swapCount++;
+          } else {
+            localArray[step.i] = step.j;
+            swapCount++;
+          }
 
-          // Perform the swap on local array and update bars
-          const temp = localArray[step.i];
-          localArray[step.i] = localArray[step.j];
-          localArray[step.j] = temp;
-          updateBar(step.i, localArray[step.i]);
-          updateBar(step.j, localArray[step.j]);
+          const highlights = {};
+          sortedSet.forEach(idx => { highlights[idx] = "sorted"; });
+
+          if (step.type === STEP_SWAP) {
+             highlights[step.i] = "swapping";
+             highlights[step.j] = "swapping";
+          } else {
+             highlights[step.i] = "swapping";
+          }
+
+          if (pivotIndex >= 0) highlights[pivotIndex] = "pivot";
+
+          const row = createRow(localArray, highlights);
+          barsContainer.appendChild(row);
+
+          const visualizer = document.getElementById("visualizer");
+          visualizer.scrollTop = visualizer.scrollHeight;
           break;
 
         case STEP_SORTED:
           sortedSet.add(step.i);
-          setBarState(step.i, "sorted");
+          setLastRowBaseState(step.i, "sorted");
           if (pivotIndex === step.i) pivotIndex = -1;
           break;
 
         case STEP_PIVOT:
           if (pivotIndex >= 0 && !sortedSet.has(pivotIndex)) {
-            setBarState(pivotIndex, "");
+            setLastRowBaseState(pivotIndex, "");
           }
           pivotIndex = step.i;
-          setBarState(step.i, "pivot");
+          setLastRowBaseState(step.i, "pivot");
           break;
       }
 
-      animationTimer = setTimeout(processStep, SPEEDS[currentSpeed]);
+      animationTimer = setTimeout(processStep, nextDelay);
     }
 
     processStep();
   }
 
   function finishSort(swaps, comps) {
-    // Mark all bars as sorted with a cascade effect
-    const bars = barsContainer.children;
+    const rows = barsContainer.children;
+    if (rows.length === 0) return;
+    const bars = rows[rows.length - 1].children;
     for (let i = 0; i < bars.length; i++) {
       setTimeout(function () {
         bars[i].className = "bar sorted celebrate";
@@ -339,17 +391,14 @@
     setTimeout(function () {
       isRunning = false;
       setControlsDisabled(false);
-      // Remove celebrate class
       for (let k = 0; k < bars.length; k++) {
         bars[k].className = "bar sorted";
       }
-      // Update currentArray to sorted
       readArrayFromWasm();
       isSorted = true;
       btnReverse.classList.remove("hidden");
       btnReverse.disabled = false;
 
-      // Update and show stats
       statSwaps.textContent = swaps;
       statComparisons.textContent = comps;
       statTime.textContent = algoStats[selectedAlgorithm].time;
@@ -359,8 +408,9 @@
   }
 
   function finishReverse(swaps, comps) {
-    // Mark all bars with a cascade effect
-    const bars = barsContainer.children;
+    const rows = barsContainer.children;
+    if (rows.length === 0) return;
+    const bars = rows[rows.length - 1].children;
     for (let i = 0; i < bars.length; i++) {
       setTimeout(function () {
         bars[i].className = "bar sorted celebrate";
@@ -378,7 +428,6 @@
       btnReverse.classList.add("hidden");
       btnReverse.disabled = true;
 
-      // Update and show stats
       statSwaps.textContent = swaps;
       statComparisons.textContent = comps;
       statTime.textContent = algoStats[selectedAlgorithm].time;

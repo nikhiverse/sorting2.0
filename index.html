@@ -7,7 +7,7 @@
       name="description"
       content="A sorting algorithm visualizer with C++ algorithms compiled to WebAssembly. Visualize Bubble, Quick, Heap, Merge, Insertion, Selection, Shell, Tim, and Tree Sort in real-time."
     />
-    <title>Sorting Visualizer</title>
+    <title>Sorting Visualizer 2.0</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -42,7 +42,7 @@
             <rect x="13" y="3" width="3" height="18" rx="1" />
             <rect x="18" y="10" width="3" height="11" rx="1" />
           </svg>
-          <h1>Sorting Visualizer</h1>
+          <h1>Sorting Visualizer 2.0</h1>
         </div>
         <div id="badge">C++ / WASM</div>
       </header>
@@ -96,20 +96,23 @@
               <button class="algo-btn" data-algo="shellSort">Shell</button>
               <button class="algo-btn" data-algo="timSort">Tim</button>
               <button class="algo-btn" data-algo="treeSort">Tree</button>
+              <button class="algo-btn" data-algo="countingSort">Counting</button>
+              <button class="algo-btn" data-algo="bucketSort">Bucket</button>
+              <button class="algo-btn" data-algo="radixSort">Radix</button>
             </div>
           </div>
 
           <!-- Array Size -->
           <div class="control-group">
             <label class="control-label"
-              >Bars: <span id="size-value">24</span></label
+              >Boxes: <span id="size-value">12</span></label
             >
             <input
               type="range"
               id="size-slider"
-              min="16"
-              max="48"
-              value="24"
+              min="8"
+              max="16"
+              value="12"
               step="1"
             />
           </div>

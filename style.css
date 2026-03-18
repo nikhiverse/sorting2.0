@@ -63,10 +63,11 @@ html, body {
 #visualizer {
   flex: 1;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
   padding: 32px 24px 16px;
   position: relative;
+  overflow-y: auto;
   background: 
     radial-gradient(ellipse at 50% 100%, rgba(6, 214, 160, 0.04) 0%, transparent 60%),
     radial-gradient(ellipse at 20% 20%, rgba(168, 85, 247, 0.03) 0%, transparent 50%),
@@ -75,27 +76,38 @@ html, body {
 
 #bars-container {
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 3px;
-  position: absolute;
-  bottom: 16px;
-  left: 24px;
-  right: 24px;
-  top: 32px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+.array-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .bar {
-  flex: 1;
-  min-width: 4px;
-  max-width: 40px;
-  border-radius: 4px 4px 0 0;
-  transition: height 0.12s ease-out, background 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
   position: relative;
-  background: linear-gradient(180deg, #667eea 0%, #3b4cb8 100%);
-  box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
+  background: linear-gradient(135deg, #667eea 0%, #3b4cb8 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 /* Bar States */
@@ -105,7 +117,7 @@ html, body {
 }
 
 .bar.swapping {
-  background: linear-gradient(180deg, #fb7185 0%, #e11d48 100%);
+  background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
   box-shadow: 0 0 18px rgba(251, 113, 133, 0.5), 0 0 40px rgba(251, 113, 133, 0.15);
 }
 
@@ -123,12 +135,9 @@ html, body {
 .bar::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 40%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%);
-  border-radius: 4px 4px 0 0;
+  inset: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
   pointer-events: none;
 }
 

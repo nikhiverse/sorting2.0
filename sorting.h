@@ -5,6 +5,7 @@
 #define STEP_SWAP    1
 #define STEP_SORTED  2
 #define STEP_PIVOT   3
+#define STEP_SET     4
 
 // Max limits
 #define MAX_ARRAY_SIZE 64

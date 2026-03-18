@@ -50,7 +50,9 @@ void markAllSorted(int n) {
 #include "algo/shell_sort.cpp"
 #include "algo/tim_sort.cpp"
 #include "algo/tree_sort.cpp"
-
+#include "algo/counting_sort.cpp"
+#include "algo/bucket_sort.cpp"
+#include "algo/radix_sort.cpp"
 // ===================== EXPORTED FUNCTIONS =====================
 extern "C" {
 
@@ -147,6 +149,33 @@ void treeSort(int length) {
     stepCount = 0;
     memcpy(workArray, arrayBuffer, length * sizeof(int));
     doTreeSort(workArray, length);
+    memcpy(arrayBuffer, workArray, length * sizeof(int));
+}
+
+EMSCRIPTEN_KEEPALIVE
+void countingSort(int length) {
+    stepCount = 0;
+    memcpy(workArray, arrayBuffer, length * sizeof(int));
+    doCountingSort(workArray, length);
+    markAllSorted(length);
+    memcpy(arrayBuffer, workArray, length * sizeof(int));
+}
+
+EMSCRIPTEN_KEEPALIVE
+void bucketSort(int length) {
+    stepCount = 0;
+    memcpy(workArray, arrayBuffer, length * sizeof(int));
+    doBucketSort(workArray, length);
+    markAllSorted(length);
+    memcpy(arrayBuffer, workArray, length * sizeof(int));
+}
+
+EMSCRIPTEN_KEEPALIVE
+void radixSort(int length) {
+    stepCount = 0;
+    memcpy(workArray, arrayBuffer, length * sizeof(int));
+    doRadixSort(workArray, length);
+    markAllSorted(length);
     memcpy(arrayBuffer, workArray, length * sizeof(int));
 }
 

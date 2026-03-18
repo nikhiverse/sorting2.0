@@ -5,7 +5,7 @@
 source ~/emsdk/emsdk_env.sh
 
 emcc sorting.cpp -o sorting.js \
-  -s EXPORTED_FUNCTIONS="['_generateArray','_getArray','_getSteps','_getStepCount','_bubbleSort','_quickSort','_heapSort','_mergeSort','_insertionSort','_selectionSort','_shellSort','_timSort','_treeSort','_setSortOrder','_malloc','_free']" \
+  -s EXPORTED_FUNCTIONS="['_generateArray','_getArray','_getSteps','_getStepCount','_bubbleSort','_quickSort','_heapSort','_mergeSort','_insertionSort','_selectionSort','_shellSort','_timSort','_treeSort','_countingSort','_bucketSort','_radixSort','_setSortOrder','_malloc','_free']" \
   -s EXPORTED_RUNTIME_METHODS="['ccall','cwrap','getValue','setValue']" \
   -s ALLOW_MEMORY_GROWTH=1 \
   -s MODULARIZE=1 \

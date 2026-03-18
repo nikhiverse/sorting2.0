@@ -14,5 +14,8 @@ static void doInsertionSort(int* arr, int n) {
                 break;
             }
         }
+        for (int k = 0; k <= i; k++) {
+            addStep(STEP_SORTED, k, -1);
+        }
     }
 }
